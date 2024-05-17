@@ -31,7 +31,6 @@ def get_pets(db: Session = Depends(get_db)):
     return pets
 
 
-#TODO Why can i send an int for name and animal field when I give a pydantic schema?
 @app.post("/testdb")
 def add_pet(pet: schemas.Pets,db: Session = Depends(get_db)):
     db_pet = models.Pets(name=pet.name, animal=pet.animal, checked_in=pet.checked_in)
@@ -41,4 +40,18 @@ def add_pet(pet: schemas.Pets,db: Session = Depends(get_db)):
     return db_pet
 
 
-#TODO PUT and DELETE
+@app.delete("/testdb/{id}")
+def delete_pet(id: int, db: Session = Depends(get_db)):
+    db_pet = db.query(models.Pets).filter(models.Pets.id == id).first()
+    db.delete(db_pet)
+    db.commit()
+    return {"message": f"Pet with id {id} was successfully deleted"}
+
+#TODO make another schema to only update the name
+@app.put("/testdb/{id}")
+def update_pet(id: int, pet: schemas.Pets ,db: Session = Depends(get_db)):
+    db_pet = db.query(models.Pets).filter(models.Pets.id == id).first()
+    db_pet.name = pet.name
+    db_pet.animal = pet.animal
+    db.commit()
+    return {"message": f"Pet with id {id} was successfully updated"}
